@@ -32,8 +32,6 @@ jobs:
         ECR_REPOSITORY: assignment1
         IMAGE_TAG: v0.1
       run: |
-        cd app/
-        ls -ltra
         # Docker build command
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         # Unit test
