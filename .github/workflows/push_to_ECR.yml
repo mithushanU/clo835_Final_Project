@@ -43,3 +43,18 @@ jobs:
         sleep 10
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+        - name: Build and push MySQL image
+        env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: assignment1
+        IMAGE_TAG: mysql_latest
+        run: |
+          cd mysql/
+          ls -ltra
+          # Docker build command
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          echo "Pause for 10 seconds to let container start"
+          sleep 10
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+
