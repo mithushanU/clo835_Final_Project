@@ -1,53 +1,49 @@
 name: Deploy to ECR
-# updated ECR Repos
+
 on:
   push:
     branches:
       - main 
 
 jobs:
-  
   build:
-    
-    name: Build Image
+    name: Build and Push Images
     runs-on: ubuntu-latest
 
-   
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
 
-    - name: Check out code
-      uses: actions/checkout@v4
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-        AWS_REGION: us-east-1
-
-    - name: Build, test, tag, and push image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: assignment1
-        IMAGE_TAG: v0.1
-      run: |
-        cd app/ 
-        ls -ltra
-        # Docker build command
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        # Unit test
-        docker run -d -p 80:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "Pause for 10 seconds to let container start"
-        sleep 10
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-        - name: Build and push MySQL image
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
         env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: assignment1
-        IMAGE_TAG: mysql_latest
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_REGION: us-east-1
+
+      - name: Build, test, tag, and push web app image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_WEB }}
+          IMAGE_TAG: v0.1
+        run: |
+          cd app/
+          ls -ltra
+          # Docker build command
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # Unit test
+          docker run -d -p 80:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Pause for 10 seconds to let container start"
+          sleep 10
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Build and push MySQL image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_DB }}
+          IMAGE_TAG: mysql_latest
         run: |
           cd mysql/
           ls -ltra
@@ -56,5 +52,3 @@ jobs:
           echo "Pause for 10 seconds to let container start"
           sleep 10
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-
