@@ -1,8 +1,9 @@
 name: Deploy to ECR
 # updated ECR Repos
-on: 
+on:
   push:
-    branches: [ master ]
+    branches:
+      - main 
 
 jobs:
   
