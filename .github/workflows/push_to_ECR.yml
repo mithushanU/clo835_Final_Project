@@ -32,12 +32,12 @@ jobs:
         ECR_REPOSITORY: assignment1
         IMAGE_TAG: v0.1
       run: |
-        #cd Chapter02/kubia/
-        #ls -ltra
+        cd app/
+        ls -ltra
         # Docker build command
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         # Unit test
-        docker run -d -p 80:8080 --name nodeapp $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker run -d -p 80:8080 --name myapp $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker ps
         echo "Pause for 10 seconds to let container start"
         sleep 10
