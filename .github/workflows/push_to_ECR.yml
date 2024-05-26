@@ -1,5 +1,5 @@
 name: Deploy to ECR
-# updated ECR Repo week3-1
+# updated ECR Repo
 on: 
   push:
     branches: [ master ]
