@@ -1,8 +1,9 @@
 name: Deploy to ECR
 # updated ECR Repo week3-1
-on: 
+on:
   push:
-    branches: [ master ]
+    branches:
+      - main
 
 jobs:
   
