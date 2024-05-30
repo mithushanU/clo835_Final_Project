@@ -1,5 +1,5 @@
 name: Deploy to ECR
-#updated V0.1
+#updated V1
 on:
   push:
     branches:
