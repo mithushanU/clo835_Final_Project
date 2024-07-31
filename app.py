@@ -1,152 +1,95 @@
 from flask import Flask, render_template, request
 from pymysql import connections
 import os
-import random
-import argparse
-import boto3 
-
+import boto3
 
 app = Flask(__name__)
 
-DBHOST = os.environ.get("DBHOST") or "localhost"
-DBUSER = os.environ.get("DBUSER") or "root"
-DBPWD = os.environ.get("DBPWD") or "password"
-DATABASE = os.environ.get("DATABASE") or "employees"
-DBPORT = int(os.environ.get("DBPORT"))
-GROUP_NAME = os.environ.get('GROUP_NAME')
-BACKGROUND_URL = os.environ.get('image') or "failed to load"
-    
+# Environment Variables
+DBHOST = os.environ.get("DBHOST", "localhost")
+DBUSER = os.environ.get("DBUSER", "root")
+DBPWD = os.environ.get("DBPWD", "password")
+DATABASE = os.environ.get("DATABASE", "employees")
+DBPORT = int(os.environ.get("DBPORT", 3306))
+GROUP_NAME = os.environ.get('GROUP_NAME', 'Group Name')
+BACKGROUND_URL = os.environ.get('BACKGROUND_URL', "https://grp3project-bucket.s3.amazonaws.com/grp3.jpg")
 
 # Create a connection to the MySQL database
 db_conn = connections.Connection(
-    host= DBHOST,
+    host=DBHOST,
     port=DBPORT,
-    user= DBUSER,
-    password= DBPWD, 
-    db= DATABASE
-    
+    user=DBUSER,
+    password=DBPWD,
+    db=DATABASE
 )
-output = {}
-table = 'employee';
-
-# # Define the supported color codes
-# color_codes = {
-#     "red": "#e74c3c",
-#     "green": "#16a085",
-#     "blue": "#89CFF0",
-#     "blue2": "#30336b",
-#     "pink": "#f4c2c2",
-#     "darkblue": "#130f40",
-#     "lime": "#C1FF9C",
-# }
-
-
-# # Create a string of supported colors
-# SUPPORTED_COLORS = ",".join(color_codes.keys())
-
-# # Generate a random color
-# COLOR = random.choice(["red", "green", "blue", "blue2", "darkblue", "pink", "lime"])
-
-# def background_file(BACKGROUND_URL(backgroundimg1), bucket):
-#     """
-#     Function to download a given file from an S3 bucket
-#     """
-#     s3 = boto3.resource('s3')
-#     output = f"background/{backgroundimg1}"
-#     s3.Bucket(bucket).background_file(BACKGROUND_URLbackgroundimg1, output)
-
-#     return output
-
-# BACKGROUND = "background/backgroundimg1"
-
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
     return render_template('addemp.html', GROUP_NAME=GROUP_NAME, background=BACKGROUND_URL)
 
-@app.route("/about", methods=['GET','POST' ])
+@app.route("/about", methods=['GET', 'POST'])
 def about():
     return render_template('about.html', GROUP_NAME=GROUP_NAME, background=BACKGROUND_URL)
 
-    
 @app.route("/addemp", methods=['POST'])
-def AddEmp():
+def add_emp():
     emp_id = request.form['emp_id']
     first_name = request.form['first_name']
     last_name = request.form['last_name']
     primary_skill = request.form['primary_skill']
     location = request.form['location']
 
-  
-    insert_sql = "INSERT INTO employee VALUES (%s, %s, %s, %s, %s)"
+    insert_sql = "INSERT INTO employee (emp_id, first_name, last_name, primary_skill, location) VALUES (%s, %s, %s, %s, %s)"
     cursor = db_conn.cursor()
 
     try:
-        
-        cursor.execute(insert_sql,(emp_id, first_name, last_name, primary_skill, location))
+        cursor.execute(insert_sql, (emp_id, first_name, last_name, primary_skill, location))
         db_conn.commit()
-        emp_name = "" + first_name + " " + last_name
-
+        emp_name = f"{first_name} {last_name}"
+    except Exception as e:
+        print(f"Error: {e}")
+        db_conn.rollback()
     finally:
         cursor.close()
 
-    print("all modification done...")
     return render_template('addempoutput.html', name=emp_name)
 
 @app.route("/getemp", methods=['GET', 'POST'])
-def GetEmp():
+def get_emp():
     return render_template("getemp.html", GROUP_NAME=GROUP_NAME, background=BACKGROUND_URL)
 
-
-@app.route("/fetchdata", methods=['GET','POST'])
-def FetchData():
+@app.route("/fetchdata", methods=['POST'])
+def fetch_data():
     emp_id = request.form['emp_id']
 
-    output = {}
-    select_sql = "SELECT emp_id, first_name, last_name, primary_skill, location from employee where emp_id=%s"
+    select_sql = "SELECT emp_id, first_name, last_name, primary_skill, location FROM employee WHERE emp_id=%s"
     cursor = db_conn.cursor()
 
+    output = {}
     try:
-        cursor.execute(select_sql,(emp_id))
+        cursor.execute(select_sql, (emp_id,))
         result = cursor.fetchone()
-        
-        # Add No Employee found form
-        output["emp_id"] = result[0]
-        output["first_name"] = result[1]
-        output["last_name"] = result[2]
-        output["primary_skills"] = result[3]
-        output["location"] = result[4]
-        
+        if result:
+            output = {
+                "emp_id": result[0],
+                "first_name": result[1],
+                "last_name": result[2],
+                "primary_skill": result[3],
+                "location": result[4]
+            }
+        else:
+            output["error"] = "Employee not found"
     except Exception as e:
-        print(e)
-
+        print(f"Error: {e}")
     finally:
         cursor.close()
 
-    return render_template("getempoutput.html", id=output["emp_id"], fname=output["first_name"],
-                           lname=output["last_name"], interest=output["primary_skills"], location=output["location"],GROUP_NAME=GROUP_NAME, background=BACKGROUND_URL)
+    return render_template("getempoutput.html", id=output.get("emp_id", "N/A"),
+                           fname=output.get("first_name", "N/A"),
+                           lname=output.get("last_name", "N/A"),
+                           primary_skill=output.get("primary_skill", "N/A"),
+                           location=output.get("location", "N/A"),
+                           GROUP_NAME=GROUP_NAME, background=BACKGROUND_URL)
 
 if __name__ == '__main__':
-    
-    # # Check for Command Line Parameters for color
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--color', required=False)
-    # args = parser.parse_args()
-
-    # if args.color:
-    #     print("Color from command line argument =" + args.color)
-    #     COLOR = args.color
-    #     if COLOR_FROM_ENV:
-    #         print("A color was set through environment variable -" + COLOR_FROM_ENV + ". However, color from command line argument takes precendence.")
-    # elif COLOR_FROM_ENV:
-    #     print("No Command line argument. Color from environment variable =" + COLOR_FROM_ENV)
-    #     COLOR = COLOR_FROM_ENV
-    # else:
-    #     print("No command line argument or environment variable. Picking a Random Color =" + COLOR)
-
-    # # Check if input color is a supported one
-    # if COLOR not in color_codes:
-    #     print("Color not supported. Received '" + COLOR + "' expected one of " + SUPPORTED_COLORS)
-    #     exit(1)
-
-    app.run(host='0.0.0.0',port=81,debug=True)
+    app.run(host='0.0.0.0', port=81, debug=True)
