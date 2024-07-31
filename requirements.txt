@@ -6,4 +6,3 @@ boto3==1.26.22
 Flask-MySQL==1.4.0  
 Jinja2==3.0.1
 MarkupSafe==2.0.1
-mysql-connector-python
