@@ -73,7 +73,7 @@ COLOR = random.choice(
 @app.route("/", methods=['GET', 'POST'])
 def home():
     
-    header_names = os.getenv('HEADER_NAMES', 'Default Names')
+    header_names = os.getenv('header_names', 'Default Names')
     return render_template('addemp.html', header_names=header_names, background_image_url=IMAGE_URL )
 
 
