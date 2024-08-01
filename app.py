@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 from pymysql import connections
 import os
-import boto3
 
 app = Flask(__name__)
 
@@ -49,6 +48,7 @@ def add_emp():
     except Exception as e:
         print(f"Error: {e}")
         db_conn.rollback()
+        emp_name = "Error occurred"
     finally:
         cursor.close()
 
@@ -84,7 +84,8 @@ def fetch_data():
     finally:
         cursor.close()
 
-    return render_template("getempoutput.html", id=output.get("emp_id", "N/A"),
+    return render_template("getempoutput.html",
+                           id=output.get("emp_id", "N/A"),
                            fname=output.get("first_name", "N/A"),
                            lname=output.get("last_name", "N/A"),
                            primary_skill=output.get("primary_skill", "N/A"),
