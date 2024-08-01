@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: final
+data:
+  IMAGE_URL: '/background-image'
+  BUCKET_NAME: "clo800backgroundimages"
+  OBJECT_NAME: "senacaimage3.jpeg"
+  HEADER_NAMES: "Teddy, Niharika, Tobe"
+  DBHOST: "192.168.13.84"
+  DBPORT: "3306"
+  DATABASE: "employees"
+  APP_COLOR: "green"

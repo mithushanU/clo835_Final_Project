@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-deployment
+  namespace: final
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: employees
+  template:
+    metadata:
+      labels:
+        app: employees
+    spec:
+      containers:
+      - name: web-app
+        image: 113222697619.dkr.ecr.us-east-1.amazonaws.com/clo835-app:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 81
+        envFrom:
+          - secretRef:
+              name: mysql-secret
+          - configMapRef:
+                name: app-config
+        
