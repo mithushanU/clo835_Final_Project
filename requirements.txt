@@ -2,7 +2,3 @@ flask==2.0.3
 pymysql==1.0.2
 cryptography==38.0.1
 Werkzeug==2.2.2
-boto3==1.26.22
-Flask-MySQL==1.4.0  
-Jinja2==3.0.1
-MarkupSafe==2.1.1
