@@ -1,6 +1,7 @@
 name: Deploy to ECR
 #updated V2
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
