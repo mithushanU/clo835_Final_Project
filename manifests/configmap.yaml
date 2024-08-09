@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: final
+data:
+  BUCKET_NAME: "myflaskappbucket1"
+  OBJECT_NAME: "background.jpg"
+  DBHOST: "192.168.29.24"
+  DATABASE: "employees"
+  DBPORT: "3306"
+  APP_COLOR: "lime"
+  header_names: "Default Names"
+  IMAGE_URL: "https://myflaskappbucket1.s3.amazonaws.com/background.jpg"
